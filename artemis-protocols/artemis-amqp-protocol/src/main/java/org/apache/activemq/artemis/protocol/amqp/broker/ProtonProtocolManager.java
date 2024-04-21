@@ -41,7 +41,7 @@ import org.apache.activemq.artemis.protocol.amqp.proton.AMQPConstants;
 import org.apache.activemq.artemis.protocol.amqp.proton.AMQPRoutingHandler;
 import org.apache.activemq.artemis.protocol.amqp.proton.AmqpSupport;
 import org.apache.activemq.artemis.protocol.amqp.sasl.ClientSASLFactory;
-import org.apache.activemq.artemis.protocol.amqp.sasl.MechanismFinder;
+import org.apache.activemq.artemis.protocol.amqp.sasl.SASLMechanismFinder;
 import org.apache.activemq.artemis.spi.core.protocol.AbstractProtocolManager;
 import org.apache.activemq.artemis.spi.core.protocol.ConnectionEntry;
 import org.apache.activemq.artemis.spi.core.protocol.ProtocolManagerFactory;
@@ -102,7 +102,7 @@ public class ProtonProtocolManager extends AbstractProtocolManager<AMQPMessage, 
 
    private int initialRemoteMaxFrameSize = 4 * 1024;
 
-   private String[] saslMechanisms = MechanismFinder.getDefaultMechanisms();
+   private final SASLMechanismFinder mechanismFinder;
 
    private String saslLoginConfigScope = "amqp-sasl-gssapi";
 
@@ -120,11 +120,17 @@ public class ProtonProtocolManager extends AbstractProtocolManager<AMQPMessage, 
 
    private int maxFrameSize = AmqpSupport.MAX_FRAME_SIZE_DEFAULT;
 
-   public ProtonProtocolManager(ProtonProtocolManagerFactory factory, ActiveMQServer server, List<BaseInterceptor> incomingInterceptors, List<BaseInterceptor> outgoingInterceptors) {
+   public ProtonProtocolManager(
+      ProtonProtocolManagerFactory factory,
+      ActiveMQServer server,
+      List<BaseInterceptor> incomingInterceptors,
+      List<BaseInterceptor> outgoingInterceptors,
+      SASLMechanismFinder mechanismFinder) {
       this.factory = factory;
       this.server = server;
       this.updateInterceptors(incomingInterceptors, outgoingInterceptors);
       routingHandler = new AMQPRoutingHandler(server);
+      this.mechanismFinder = mechanismFinder;
    }
 
    public synchronized ReferenceIDSupplier getReferenceIDSupplier() {
@@ -316,12 +322,17 @@ public class ProtonProtocolManager extends AbstractProtocolManager<AMQPMessage, 
       this.maxFrameSize = maxFrameSize;
    }
 
+   public SASLMechanismFinder getSaslMechanismFinder()
+   {
+      return this.mechanismFinder;
+   }
+
    public String[] getSaslMechanisms() {
-      return saslMechanisms;
+      return this.getSaslMechanismFinder().getSaslMechanisms();
    }
 
    public void setSaslMechanisms(String[] saslMechanisms) {
-      this.saslMechanisms = saslMechanisms;
+      this.mechanismFinder.setSaslMechanisms(saslMechanisms);
    }
 
    public String getSaslLoginConfigScope() {

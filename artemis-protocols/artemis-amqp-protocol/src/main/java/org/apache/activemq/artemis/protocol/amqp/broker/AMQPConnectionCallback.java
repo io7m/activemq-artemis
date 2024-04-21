@@ -43,7 +43,6 @@ import org.apache.activemq.artemis.protocol.amqp.proton.AmqpSupport;
 import org.apache.activemq.artemis.protocol.amqp.proton.handler.ExtCapability;
 import org.apache.activemq.artemis.protocol.amqp.proton.transaction.ProtonTransactionImpl;
 import org.apache.activemq.artemis.protocol.amqp.sasl.AnonymousServerSASL;
-import org.apache.activemq.artemis.protocol.amqp.sasl.MechanismFinder;
 import org.apache.activemq.artemis.protocol.amqp.sasl.SASLResult;
 import org.apache.activemq.artemis.protocol.amqp.sasl.ServerSASL;
 import org.apache.activemq.artemis.protocol.amqp.sasl.ServerSASLFactory;
@@ -105,7 +104,7 @@ public class AMQPConnectionCallback implements FailureListener, CloseListener {
    public ServerSASL getServerSASL(final String mechanism) {
       ServerSASL result = null;
       if (isPermittedMechanism(mechanism)) {
-         ServerSASLFactory factory = MechanismFinder.getFactory(mechanism);
+         ServerSASLFactory factory = this.manager.getSaslMechanismFinder().getFactory(mechanism);
          if (factory != null) {
             result = factory.create(server, manager, connection, protonConnectionDelegate);
          } else {

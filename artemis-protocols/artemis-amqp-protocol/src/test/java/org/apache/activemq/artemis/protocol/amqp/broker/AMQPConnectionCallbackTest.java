@@ -25,6 +25,7 @@ import org.apache.activemq.artemis.core.server.impl.ActiveMQServerImpl;
 import org.apache.activemq.artemis.protocol.amqp.sasl.AnonymousServerSASL;
 import org.apache.activemq.artemis.protocol.amqp.sasl.GSSAPIServerSASL;
 import org.apache.activemq.artemis.protocol.amqp.sasl.PlainSASL;
+import org.apache.activemq.artemis.protocol.amqp.sasl.SASLMechanismFinderDefault;
 import org.apache.activemq.artemis.utils.ExecutorFactory;
 import org.apache.activemq.artemis.utils.actors.ArtemisExecutor;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class AMQPConnectionCallbackTest {
 
    @Test
    public void getServerSASLOnlyAllowedMechs() throws Exception {
-      ProtonProtocolManager protonProtocolManager = new ProtonProtocolManager(new ProtonProtocolManagerFactory(), null, null, null);
+      ProtonProtocolManager protonProtocolManager = new ProtonProtocolManager(new ProtonProtocolManagerFactory(), null, null, null, new SASLMechanismFinderDefault());
       protonProtocolManager.setSaslMechanisms(new String[]{PlainSASL.NAME});
       AMQPConnectionCallback connectionCallback = new AMQPConnectionCallback(protonProtocolManager, new InVMConnection(1, null, null, null), null, new ActiveMQServerImpl());
       assertEquals(1, connectionCallback.getSaslMechanisms().length);
@@ -52,7 +53,7 @@ public class AMQPConnectionCallbackTest {
 
    @Test
    public void getServerSASLAnonDefault() throws Exception {
-      ProtonProtocolManager protonProtocolManager = new ProtonProtocolManager(new ProtonProtocolManagerFactory(), null, null, null);
+      ProtonProtocolManager protonProtocolManager = new ProtonProtocolManager(new ProtonProtocolManagerFactory(), null, null, null, new SASLMechanismFinderDefault());
       protonProtocolManager.setSaslMechanisms(new String[]{});
       AMQPConnectionCallback connectionCallback = new AMQPConnectionCallback(protonProtocolManager, null, null, new ActiveMQServerImpl());
       assertNotNull("can get anon with empty list", connectionCallback.getServerSASL(AnonymousServerSASL.NAME));
